@@ -1,5 +1,5 @@
 # from . import sendmsg
-__all__ = ['n2u', 'A', 'mysql_helper']
+__all__ = ['n2u', 'A', 'mysql_helper', 'NFLError']
 
 name = "fengluU"
 
@@ -10,6 +10,10 @@ class A(object):
     
     def __str__(self):
         return 'A cls'
+
+
+class NFLError(Exception):
+    pass
 
 
 if __name__ == '__main__':
