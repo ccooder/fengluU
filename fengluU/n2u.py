@@ -1,6 +1,7 @@
 #! /usr/bin/python
 # encoding=utf-8
 # Created by Fenglu Niu on 2018/06/04 09:35
+from fengluU import NFLError
 
 __all__ = ['number2upper', 'CN_UNIT']
 
@@ -63,8 +64,7 @@ def number2upper(num: int) -> str:
     
     # 首先验证输入的数字是否合法
     if not isinstance(num, int):
-        print('您输入的数字不是整数吧，我只能支持整数，我在正在努力学习，嘤嘤嘤')
-        return None
+        raise NFLError('您输入的数字不是整数吧，我只能支持整数，我在正在努力学习，嘤嘤嘤')
     upper_num = ''
     # 首先将数字转换成单个数字的列表
     num_list = [int(str_num) for str_num in str(num)]
@@ -82,14 +82,15 @@ def number2upper(num: int) -> str:
             if CN_UNIT.count(unit) == 1:
                 """数字为0,但是该位数字的单位是CN_UNIT等中的一个的情况\n
                     如果前一位是零，则删除零
-                        这里会有一种极端情况，如果接下的四位数都为零，则会出现两个单位碰到一起\n
+                        这里会有一种极端情况，如果接下的超过四位数都为零，则会出现两个单位碰到一起\n
                         这时候就在末尾用零代替第二个单位
                 """
                 if upper_num.endswith('零'):
                     upper_num = upper_num.rstrip('零')
                     if CN_UNIT.count(upper_num[-1:-2:-1]):
-                        upper_num += '零'
-                        continue
+                        if CN_UNIT.index(unit) - CN_UNIT.index(upper_num[-1:-2:-1]) < 1:
+                            upper_num += '零'
+                            continue
                 upper_num += unit
             else:  # 如果数字为零并且不在上述单位，并且前一位不是零，则加上零
                 if not upper_num.endswith('零'):
@@ -104,4 +105,4 @@ def number2upper(num: int) -> str:
 
 
 if __name__ == '__main__':
-    print(number2upper(100000000000001))
+    print(number2upper(1230000000837836005))

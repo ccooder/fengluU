@@ -8,6 +8,8 @@ from mysql.connector.errors import IntegrityError
 import sys
 from fengluU import NFLError
 
+__all__ = ['MySQLHelper', 'QueryDict', 'QueryDictList', 'QueryOpt']
+
 
 def auto_close(func):
     """
@@ -131,7 +133,7 @@ class MySQLHelper(object):
                 # params.append(qd.value)
                 params.setdefault(qd.key, qd.value)
         return where
-
+    
     @staticmethod
     def execute(cursor=None, sql=str, params=tuple) -> str:
         if '%s' in sql:
@@ -404,12 +406,12 @@ if __name__ == '__main__':
     # querykw.setdefault('update_list', ul)
     # querykw.setdefault('query_list', ql)
     # print(helper.update(**querykw))
-
+    
     # querykw = {}
     # querykw.setdefault('sql', 'DELETE FROM areas WHERE code=%s')
     # querykw.setdefault('params', (1,))
     # print(helper.delete(**querykw))
-
+    
     # querykw = {}
     # querykw.setdefault('tablename', 'areas')
     # ql = QueryDictList()
