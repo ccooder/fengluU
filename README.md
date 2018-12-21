@@ -1,4 +1,7 @@
 # Fenglu's Utils for Python
+## 如何使用
+* `$ pip3 install fengluB`
+* 在Py文件中引入 `from fengluU import n2u`
 ## n2u number2upper 
 * 将输入的数字按照中文的书写方式返回(支持的数字长度是8192位数字)
     > 例如：
