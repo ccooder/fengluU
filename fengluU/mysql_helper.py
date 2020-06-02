@@ -1,11 +1,14 @@
 #! /usr/bin/python
 # encoding=utf-8
 # Created by Fenglu Niu on 2018/07/05 10:11
-from typing import Any
+from typing import Any, Tuple
 
 from mysql.connector import pooling
 from mysql.connector.errors import IntegrityError
 import sys
+
+from mysql.connector.pooling import PooledMySQLConnection
+
 from fengluU import NFLError
 
 __all__ = ['MySQLHelper', 'QueryDict', 'QueryDictList', 'QueryOpt']
@@ -15,69 +18,71 @@ def auto_close(func):
     """
     universal auto_close decorator
     """
-    
+
     def call_func(self, *args, **kwargs):
         cnx = self.get_cnx()
         ret = func(self, cnx=cnx, *args, **kwargs)
+        assert isinstance(cnx, PooledMySQLConnection)
         cnx.close()
         return ret
-    
+
     return call_func
 
 
 class QueryOpt(object):
     REL_AND = 'AND'
     REL_OR = 'OR'
-    OPT_IS = 'IS'
-    OPT_IS_NOT = 'IS NOT'
+    OPT_IS = ' IS '
+    OPT_IS_NOT = ' IS NOT '
     OPT_EQUAL = '='
     OPT_GT = '>'
     OPT_GTE = '>='
     OPT_LT = '<'
     OPT_LTE = '<='
     OPT_NE = '<>'
+    OPT_LIKE = ' LIKE '
 
 
 class QueryDict(object):
-    
+
     def __init__(self, key=None, opt=QueryOpt.OPT_EQUAL, value=None, rel=QueryOpt.REL_AND):
         self.__key = key
         self.__opt = opt
         self.__value = value
         self.__rel = rel
-    
+
     @property
     def key(self) -> str:
         return self.__key
-    
+
     @key.setter
     def key(self, key: str) -> None:
         self.__key = key
-    
+
     @property
     def opt(self) -> str:
         return self.__opt
-    
+
     @opt.setter
     def opt(self, opt: str) -> None:
         self.__opt = opt
-    
+
     @property
     def value(self) -> str:
         return self.__value
-    
+
     @value.setter
     def value(self, value: str) -> None:
         self.__value = value
-    
+
     @property
     def rel(self) -> str:
         return self.__rel
-    
+
     @rel.setter
     def rel(self, rel: str) -> None:
         self.__rel = rel
-    
+
     def put(self, key='', opt=QueryOpt.OPT_EQUAL, value=Any, rel=QueryOpt.REL_AND) -> None:
         self.__key = key
         self.__opt = opt
@@ -88,7 +93,7 @@ class QueryDict(object):
 class QueryDictList(list):
     def __init__(self):
         super().__init__()
-    
+
     def put(self, qd: QueryDict) -> None:
         self.append(qd)
 
@@ -110,30 +115,36 @@ class MySQLHelper(object):
     """
     __instance = None
     __is_first = True
-    
+
     def __new__(cls):
         if not cls.__instance:
             cls.__instance = object.__new__(cls)
         return cls.__instance
-    
+
     def __init__(self):
         if self.__is_first:
             MySQLHelper.__is_first = False
-    
+            self.__logging = False
+
     def get_cnx(self):
         return self.__cnxpool.get_connection()
-    
+
+    @property
+    def logging(self) -> str:
+        return self.logging
+
+    @logging.setter
+    def logging(self, logging: bool):
+        self.__logging = logging
+
     @staticmethod
-    def generate_where(ql: QueryDictList, params) -> str:
-        where = ''
+    def generate_where(ql: QueryDictList) -> Tuple[str, dict]:
+        where = ' WHERE 1=1 '
         if ql:
-            for qd in ql:
-                assert isinstance(qd, QueryDict)
-                where += qd.rel + ' ' + qd.key + qd.opt + '%(' + qd.key + ')s '
-                # params.append(qd.value)
-                params.setdefault(qd.key, qd.value)
-        return where
-    
+            params = {qd.key: qd.value for qd in ql}
+            where += ''.join([qd.rel + ' ' + qd.key + qd.opt + '%(' + qd.key + ')s ' for qd in ql])
+        return where, params
+
     @staticmethod
     def execute(cursor=None, sql=str, params=tuple) -> str:
         if '%s' in sql:
@@ -143,7 +154,7 @@ class MySQLHelper(object):
                 cursor.execute(sql, params)
         else:
             cursor.execute(sql)
-    
+
     @auto_close  # query = auto_close(query)
     def query(self, cnx=None, **kwargs) -> list:
         """
@@ -163,17 +174,16 @@ class MySQLHelper(object):
             MySQLHelper.execute(cursor=cursor, sql=sql, params=params)
         else:
             tablename = kwargs.get('tablename')
-            params = {}
             ql = kwargs.get('query_list')
             if not tablename:
                 raise NFLError('如果没有传sql，必须传tablename')
             sql = 'select * from ' + tablename + ' where 1=1 '
-            where = MySQLHelper.generate_where(ql, params)
+            where, params = MySQLHelper.generate_where(ql)
             cursor.execute(sql + where, params)
         for row in cursor:
             result.append(row)
         return result
-    
+
     @auto_close
     def query_count(self, cnx=None, **kwargs) -> list:
         """
@@ -192,17 +202,16 @@ class MySQLHelper(object):
             MySQLHelper.execute(cursor=cursor, sql=sql)
         else:
             tablename = kwargs.get('tablename')
-            params = {}
             ql = kwargs.get('query_list')
             if not tablename:
                 raise NFLError('如果没有传sql，必须传tablename')
             sql = 'select count(*) from ' + tablename + ' where 1=1 '
-            where = MySQLHelper.generate_where(ql, params)
+            where, params = MySQLHelper.generate_where(ql)
             cursor.execute(sql + where, params)
         count = cursor.fetchone()[0]
         # cnx.close()
         return count
-    
+
     @auto_close
     def insert(self, cnx=None, **kwargs) -> tuple:
         """
@@ -226,21 +235,32 @@ class MySQLHelper(object):
                 tablename = kwargs.get('tablename')
                 params = {}
                 ql = kwargs.get('query_list')
+                ql_list = kwargs.get('ql_list')
                 if not tablename:
                     raise NFLError('如果没有传sql，必须传tablename')
                 if not ql:
-                    raise NFLError('插入语句params必须有query_list<QueryDictList>字段')
-                assert isinstance(ql, QueryDictList)
+                    if not ql_list or not len(ql_list):
+                        raise NFLError('插入语句params必须有query_list<QueryDictList>字段,或者ql_list<list<QueryDictList>>字段')
+
                 sql = 'INSERT INTO ' + tablename
                 names = ' ('
                 values = ' VALUES ('
-                for qd in ql:
-                    assert isinstance(qd, QueryDict)
-                    names += qd.key + ','
-                    values += '%(' + qd.key + ')s,'
-                    params.setdefault(qd.key, qd.value)
-                names = names.rstrip(',') + ')'
-                values = values.rstrip(',') + ')'
+                if ql:
+                    assert isinstance(ql, QueryDictList)
+                    names += ','.join([qd.key for qd in ql])
+                    values += ','.join(['%(' + qd.key + ')s' for qd in ql])
+                    params = {qd.key: qd.value for qd in ql}
+                    values += ")"
+                elif ql_list:
+                    names += ','.join([qd.key for qd in ql_list[0]])
+                    values = ' VALUES '
+                    values += ',\n'.join(['(' + ', '.join(value) + ')' for value in
+                                          [['%(' + qd.key + str(i) + ')s' for qd in ql] for i, ql in
+                                           enumerate(ql_list)]])
+                    params = {item[0].key + str(item[1]): item[0].value for qdi in
+                              [[(qd, i) for qd in ql] for i, ql in enumerate(ql_list)] for item in qdi}
+
+                names += ")"
                 print(sql + names + values)
                 cursor.execute(sql + names + values, params)
             row = cursor.rowcount
@@ -251,7 +271,7 @@ class MySQLHelper(object):
             print(params)
         # cnx.close()
         return row, rowid
-    
+
     @auto_close
     def update(self, cnx=None, **kwargs) -> int:
         """
@@ -281,14 +301,11 @@ class MySQLHelper(object):
                     raise NFLError('更新语句params必须有update_list<QueryDictList>字段')
                 assert isinstance(ul, QueryDictList)
                 sql = 'UPDATE ' + tablename + ' SET '
-                updates = ''
-                for ud in ul:
-                    assert isinstance(ud, QueryDict)
-                    updates = ud.key + '=%(' + ud.key + ')s '
-                    params.setdefault(ud.key, ud.value)
-                where = ' WHERE 1=1 '
-                where += MySQLHelper.generate_where(ql=ql, params=params)
-                print(sql + updates + where)
+                updates = ' '.join([ud.key + '=%(' + ud.key + ')s' for ud in ul])
+                params = {ud.key: ud.value for ud in ul}
+                where, ql_params = MySQLHelper.generate_where(ql=ql)
+                params.update(ql_params)
+                # print(sql + updates + where)
                 cursor.execute(sql + updates + where, params)
             row = cursor.rowcount
             cnx.commit()
@@ -297,7 +314,7 @@ class MySQLHelper(object):
             print(params)
         # cnx.close()
         return row
-    
+
     @auto_close
     def delete(self, cnx=None, **kwargs) -> int:
         """
@@ -325,9 +342,9 @@ class MySQLHelper(object):
                 if not ql:
                     raise NFLError('更新语句params必须有query_list<QueryDictList>字段')
                 assert isinstance(ql, QueryDictList)
-                sql = 'DELETE FROM ' + tablename + ' WHERE 1=1 '
-                where = MySQLHelper.generate_where(ql=ql, params=params)
-                print(sql + where)
+                sql = 'DELETE FROM ' + tablename
+                where, params = MySQLHelper.generate_where(ql=ql)
+                # print(sql + where)
                 cursor.execute(sql + where, params)
             row = cursor.rowcount
             cnx.commit()
@@ -336,9 +353,9 @@ class MySQLHelper(object):
             print(params)
         # cnx.close()
         return row
-    
+
     def set_config(self, **config):
-        self.__cnxpool = pooling.MySQLConnectionPool(pool_name='nfl_poll',
+        self.__cnxpool = pooling.MySQLConnectionPool(pool_name='nfl_pool',
                                                      pool_size=32,
                                                      **config
                                                      )
@@ -346,75 +363,112 @@ class MySQLHelper(object):
 
 if __name__ == '__main__':
     config = {
-        'user': 'root',
-        'charset': 'utf8',
-        'password': 'root',
+        'user': 'king',
+        'password': 'king001',
         'host': '127.0.0.1',
-        'database': 'cn_area',
+        'database': 'king',
+        'charset': 'utf8',
         'raise_on_warnings': True,
     }
     helper = MySQLHelper()
     helper.set_config(**config)
-    # 首先查询省份
+    helper.logging = True
+    # 下面是示例代码
+    # Student表结构
+    # +-------+-------------+------+-----+---------+----------------+
+    # | Field | Type       | Null  | Key | Default | Extra          |
+    # +-------+-------------+------+-----+---------+----------------+
+    # | id   | int(11)     | NO   | PRI | NULL     | auto_increment |
+    # | name | varchar(32) | NO   |     | NULL     |                |
+    # | age | int(11)      | YES  |     | NULL     |                |
+    # +-------+-------------+------+-----+---------+----------------+
+
+    # 通过SQL查询
     # querykw = {}
-    # querykw.setdefault('sql', 'select * from areas where p_code=%s')
-    # querykw.setdefault('params', (410000,))
+    # querykw.setdefault('sql', 'select * from student where id=%s')
+    # querykw.setdefault('params', (1,))
     # # querykw.setdefault('tablename', 'areas')
     # rows = helper.query(**querykw)
     # print(rows)
-    # ql = QueryList()
+
+    # # 通过指定表名和条件查询
+    # ql = QueryDictList()
     # qd = QueryDict()
-    # qd.put(key='p_code', value=410100)
+    # qd.put(key='id', value=2, rel=QueryOpt.REL_AND)
     # ql.put(qd)
-    
+    # qd = QueryDict()
+    # qd.put(key='name', opt=QueryOpt.OPT_LIKE, value='张%', rel=QueryOpt.REL_OR)
+    # ql.put(qd)
+    # qd = QueryDict()
+    # qd.put(key='age', opt=QueryOpt.OPT_IS, value=None, rel=QueryOpt.REL_AND)
+    # ql.put(qd)
     # querykw = {}
-    # querykw.setdefault('tablename', 'areas')
+    # querykw.setdefault('tablename', 'student')
     # querykw.setdefault('query_list', ql)
     # rows = helper.query(**querykw)
     # print(rows)
-    
+
+    # 查询数量
     # querykw = {}
-    # querykw.setdefault('tablename', 'areas')
+    # ql = QueryDictList()
+    # qd = QueryDict()
+    # qd.put(key='age', opt=QueryOpt.OPT_GTE, value=18)
+    # ql.append(qd)
+    # querykw.setdefault('tablename', 'student')
+    # querykw.setdefault('query_list', ql)
     # count = helper.query_count(**querykw)
     # print(count)
-    
+
+    # sql添加
     # querykw = {}
-    # querykw.setdefault('sql', 'insert into areas (code, name, level, p_code) values (1, "郑州郑州", 1, 410000)')
+    # querykw.setdefault('sql', 'insert into student (name, age) values ("张六", 19)')
     # print(helper.insert(**querykw))
-    
+
+    # # 指定表名和字段添加 (可批量插入)
     # querykw = {}
-    # querykw.setdefault('tablename', 'areas')
+    # querykw.setdefault('tablename', 'student')
+    # ql_list = []
     # ql = QueryDictList()
-    # ql.append(QueryDict(key='code', value=1))
-    # ql.append(QueryDict(key='name', value='郑州郑州2'))
-    # ql.append(QueryDict(key='level', value=1))
-    # ql.append(QueryDict(key='p_code', value=410000))
+    # ql.append(QueryDict(key='name', value='赵七'))
+    # ql.append(QueryDict(key='age', value=20))
+    # ql_list.append(ql)
+    # ql = QueryDictList()
+    # ql.append(QueryDict(key='name', value='李八'))
+    # ql.append(QueryDict(key='age', value=19))
+    # ql_list.append(ql)
+    # # 若单条添加，则添加一个ql，键值为query_list
     # querykw.setdefault('query_list', ql)
+    # # 若批量添加,则添加一个ql_list,键值为ql_list
+    # querykw.setdefault('ql_list', ql_list)
     # print(helper.insert(**querykw))
-    
+
+    # # sql更新
     # querykw = {}
-    # querykw.setdefault('sql', 'update areas set name=%s where code=2')
-    # querykw.setdefault('params', ('郑州1',))
+    # querykw.setdefault('sql', 'update student set name=%s where id=1')
+    # querykw.setdefault('params', ('张三',))
     # print(helper.update(**querykw))
-    
+
+    # # 指定表名和字段更新
     # querykw = {}
-    # querykw.setdefault('tablename', 'areas')
+    # querykw.setdefault('tablename', 'student')
     # ul = QueryDictList()
-    # ul.append(QueryDict(key='name', value='郑州'))
+    # ul.append(QueryDict(key='name', value='张三'))
     # ql = QueryDictList()
-    # ql.append(QueryDict(key='code', value=2))
+    # ql.append(QueryDict(key='id', value=1))
     # querykw.setdefault('update_list', ul)
     # querykw.setdefault('query_list', ql)
     # print(helper.update(**querykw))
-    
+
+    # # sql删除
     # querykw = {}
-    # querykw.setdefault('sql', 'DELETE FROM areas WHERE code=%s')
-    # querykw.setdefault('params', (1,))
+    # querykw.setdefault('sql', 'delete from student where id=%s')
+    # querykw.setdefault('params', (7,))
     # print(helper.delete(**querykw))
-    
+
+    # # 指定表名和字段删除
     # querykw = {}
-    # querykw.setdefault('tablename', 'areas')
+    # querykw.setdefault('tablename', 'student')
     # ql = QueryDictList()
-    # ql.append(QueryDict(key='code', value=1))
+    # ql.append(QueryDict(key='id', value=7))
     # querykw.setdefault('query_list', ql)
     # print(helper.delete(**querykw))
