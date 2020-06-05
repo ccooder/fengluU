@@ -69,8 +69,9 @@ def number2upper(num: int) -> str:
     # 首先将数字转换成单个数字的列表
     num_list = [int(str_num) for str_num in str(num)]
     len_num = len(num_list)
-    if len_num > 2 ** (len(CN_UNIT) + 2):
-        raise NFLError('您输入的数字太长了，我只能支持65536位数字，嘤嘤嘤')
+    max_len = 2 ** (len(CN_UNIT) + 2)
+    if len_num > max_len:
+        raise NFLError('您输入的数字太长了，我只能支持' + str(max_len) + '位数字，嘤嘤嘤')
     for i in range(len_num):
         num_bit = num_list[i]
 
@@ -113,7 +114,5 @@ def number2upper(num: int) -> str:
 
 
 if __name__ == '__main__':
-    sn = '1'
-    for i in range(8):
-        sn += '9'
+    sn = '1' + '0' * 65536
     print(number2upper(int(sn)))
