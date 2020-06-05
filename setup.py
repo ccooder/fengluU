@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fengluB",
-    version="0.0.02_alpha1",
-    # version="0.0.02_alpha2",
+    version="0.0.02_alpha2",
+    # version="0.0.02_alpha3",
     author="Fenglu Niu",
     author_email="niufenglu@gmail.com",
     description="牛逢路的开发工具包",
@@ -25,7 +25,7 @@ setuptools.setup(
     ],
 )
 # 1. python setup.py sdist bdist_wheel
-# python setup.py install bdist_wheel
+# python setup.py install bdist_wheetl
 # 2. twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 # 2. twine upload dist/*
 # 3. sudo pip install --index-url https://test.pypi.org/project/fengluA projectname
