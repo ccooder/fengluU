@@ -11,6 +11,8 @@ from mysql.connector.pooling import PooledMySQLConnection
 
 from fengluU import NFLError
 
+from fengluU import n2u
+
 __all__ = ['MySQLHelper', 'QueryDict', 'QueryDictList', 'QueryOpt']
 
 
@@ -374,6 +376,7 @@ if __name__ == '__main__':
     helper.set_config(**config)
     # 启用日志与否
     helper.logging = True
+
     # 下面是示例代码
     # Student表结构
     # +-------+-------------+------+-----+---------+----------------+

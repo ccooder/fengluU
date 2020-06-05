@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fengluB",
-    version="0.0.02_alpha3",
-    # version="0.0.02_alpha4",
+    version="0.0.02_alpha5",
+    # version="0.0.02_alpha6",
     author="Fenglu Niu",
     author_email="niufenglu@gmail.com",
     description="牛逢路的开发工具包",
