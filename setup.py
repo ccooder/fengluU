@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fengluB",
-    version="0.0.02_alpha5",
-    # version="0.0.02_alpha6",
+    version="0.0.02_alpha8",
+    # version="0.0.02_alpha9",
     author="Fenglu Niu",
     author_email="niufenglu@gmail.com",
     description="牛逢路的开发工具包",
@@ -14,11 +14,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/ccooder/fengluU",
     packages=setuptools.find_packages(),
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ),
+    ],
     python_requires='>=3.6',
     install_requires=[
         "mysql-connector-python==8.0.11",
