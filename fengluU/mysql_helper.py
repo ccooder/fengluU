@@ -118,10 +118,10 @@ class MySQLHelper(object):
     __instance = None
     __is_first = True
 
-    def __new__(cls):
-        if not cls.__instance:
-            cls.__instance = object.__new__(cls)
-        return cls.__instance
+    # def __new__(cls):
+    #     if not cls.__instance:
+    #         cls.__instance = object.__new__(cls)
+    #     return cls.__instance
 
     def __init__(self):
         if self.__is_first:
@@ -377,7 +377,7 @@ class MySQLHelper(object):
         """
         cursor = cnx.cursor()
         cursor.execute(f"DESC {table}")
-        feilds = [{'key': f[0], 'type': f[1], 'null': 'null' if f[2] == 'YES' else 'not null'} for f in cursor.fetchall()]
+        feilds = [{'key': f[0], 'type': f[1], 'null': 'NULL' if f[2] == 'YES' else 'NOT NULL'} for f in cursor.fetchall()]
         return feilds
 
     def set_config(self, **config):
