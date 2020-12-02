@@ -168,5 +168,5 @@ def pop_unit():
 if __name__ == '__main__':
     sn = '1' + '0' * 65535
     append_uint("牛逢路")
-    pop_unit()
+    # pop_unit()
     print(number2upper(int(sn)))

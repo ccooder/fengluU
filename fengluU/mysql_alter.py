@@ -120,7 +120,7 @@ if __name__ == '__main__':
     helper_new.set_config(**config_new)
     tables = helper_old.show_tables()
     alter_sqls = gen_alter('student')
-    print('\n\033[31m生成ALTER SQL如下:\033[0m')
+    print('\n\033[32m生成ALTER SQL如下:\033[0m')
     for sql in alter_sqls:
         print(sql)
     pass

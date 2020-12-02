@@ -303,7 +303,7 @@ class MySQLHelper(object):
                     raise NFLError('更新语句params必须有update_list<QueryDictList>字段')
                 assert isinstance(ul, QueryDictList)
                 sql = 'UPDATE ' + tablename + ' SET '
-                updates = ' '.join([ud.key + '=%(' + ud.key + ')s' for ud in ul])
+                updates = ', '.join([ud.key + '=%(' + ud.key + ')s' for ud in ul])
                 params = {ud.key: ud.value for ud in ul}
                 where, ql_params = MySQLHelper.generate_where(ql=ql)
                 params.update(ql_params)

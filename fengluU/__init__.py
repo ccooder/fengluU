@@ -1,5 +1,5 @@
 # from . import sendmsg
-__all__ = ['n2u', 'A', 'mysql_helper', 'NFLError']
+__all__ = ['n2u', 'A', 'mysql_helper', 'NFLError', 'mysql_alter']
 
 name = "fengluU"
 
