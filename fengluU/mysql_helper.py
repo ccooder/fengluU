@@ -179,7 +179,7 @@ class MySQLHelper(object):
             ql = kwargs.get('query_list')
             if not tablename:
                 raise NFLError('如果没有传sql，必须传tablename')
-            sql = 'select * from ' + tablename + ' where 1=1 '
+            sql = 'select * from ' + tablename
             where, params = MySQLHelper.generate_where(ql)
             cursor.execute(sql + where, params)
         for row in cursor:
@@ -207,7 +207,7 @@ class MySQLHelper(object):
             ql = kwargs.get('query_list')
             if not tablename:
                 raise NFLError('如果没有传sql，必须传tablename')
-            sql = 'select count(*) from ' + tablename + ' where 1=1 '
+            sql = 'select count(*) from ' + tablename
             where, params = MySQLHelper.generate_where(ql)
             cursor.execute(sql + where, params)
         count = cursor.fetchone()[0]
