@@ -30,3 +30,7 @@
     
 ## MySQLHelper
 * MySQLHelper MySQL工具类，便于数据库连接池及连接的管理和增删改查
+
+## MySQL Alter
+* MySQLAlter MYSQL对比表不同工具类，便于比较不同环境的数据库表，并生成改表语句
+

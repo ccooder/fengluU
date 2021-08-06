@@ -363,7 +363,7 @@ class MySQLHelper(object):
         :return: 将数据库中表名列表予以返回
         """
         cursor = cnx.cursor()
-        cursor.execute("SHOW TABLES")
+        cursor.execute('SHOW TABLES')
         tables = [row[0] for row in cursor.fetchall()]
         return tables
 
@@ -376,9 +376,31 @@ class MySQLHelper(object):
         :return: 将表结构的字典列表予以返回（key:字段名，type:字段类型，null:是否为空）
         """
         cursor = cnx.cursor()
-        cursor.execute(f"DESC {table}")
-        feilds = [{'key': f[0], 'type': f[1], 'null': 'NULL' if f[2] == 'YES' else 'NOT NULL'} for f in cursor.fetchall()]
+        cursor.execute(f'DESC {table}')
+        feilds = [{'key': f[0], 'type': f[1], 'null': 'NULL' if f[2] == 'YES' else 'NOT NULL'} for f in
+                  cursor.fetchall()]
         return feilds
+
+    @auto_close
+    def get_table_ddl(self, cnx: PooledMySQLConnection = None, table: str = None):
+        """
+        数据库小助手-获取表DDL\n
+        :param cnx: 数据库连接，装饰器自动赋值
+        :param table: 表名
+        :return: 将表的DDL语句返回
+        """
+        cursor = cnx.cursor()
+        cursor.execute(f'SHOW CREATE TABLE {table}')
+        return cursor.fetchone()[1]
+
+    @auto_close
+    def exec_ddl(self, cnx: PooledMySQLConnection = None, ddl: str = None):
+        """
+        数据库小助手-执行DDL语句\n
+        :param ddl: DDL语句
+        """
+        cursor = cnx.cursor()
+        cursor.execute(ddl)
 
     def set_config(self, **config):
         self.__cnxpool = pooling.MySQLConnectionPool(pool_name='nfl_pool',
@@ -403,6 +425,7 @@ if __name__ == '__main__':
 
     print(helper.show_tables())
     print(helper.get_table_fields(table='student'))
+    print(helper.get_table_ddl(table='student'))
 
     # 下面是示例代码
     # Student表结构
