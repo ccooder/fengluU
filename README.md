@@ -24,7 +24,7 @@
     > 添加方法: `n2u.append_unit('更大的单位')`                                    
 * 参数：
     
-    > :param num: 一个整型数字
+    > :param num: int 一个整型数字
 * 返回值 
     > :return: 返回数字的中文书写方式
 * 用法
@@ -40,13 +40,13 @@
         123456789<br/>
         壹亿贰仟叁佰肆拾伍万陆仟柒佰捌拾玖元整
 * 参数
-    > :param num: 人民币小写金额
+    > :param num: str 人民币小写金额
 * 返回值
     > :return: 返回人民币大写的形式
 * 用法
     > ```python
     > from fengluU import rmb2u
-    > print(rmb2u(1234567.89))
+    > print(rmb2u('1234567.89'))
     > $ 壹佰贰拾叁万肆仟伍佰陆拾柒元捌角玖分
     > ```
 

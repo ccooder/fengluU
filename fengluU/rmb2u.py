@@ -160,7 +160,7 @@ def rmb2upper(num: str) -> str:
 
 
 if __name__ == '__main__':
-    sn = '11'
+    sn = 1234567.89
     # append_uint("牛逢路")
     # pop_unit()
     print(rmb2upper(str(sn)))
