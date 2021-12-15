@@ -67,20 +67,20 @@ class N2U(object):
                 elif remain == 3:
                     return '千'
             else:
-                consult_4 = num_index // 4
-                if consult_4 % 2 != 0:
+                quotient_4 = num_index // 4
+                if quotient_4 % 2 != 0:
                     return '万'
                 else:
-                    bin_consult_4 = bin(consult_4)
-                    c1_bin_consult_4 = bin_consult_4.split('b')[1].count('1')
-                    c0_bin_consult_4 = bin_consult_4.split('b')[1].count('0')
-                    if c1_bin_consult_4 == 1:
-                        return self.__CN_UNIT[c0_bin_consult_4]
+                    bin_quotient_4 = bin(quotient_4)
+                    c1_bin_quotient_4 = bin_quotient_4.split('b')[1].count('1')
+                    c0_bin_quotient_4 = bin_quotient_4.split('b')[1].count('0')
+                    if c1_bin_quotient_4 == 1:
+                        return self.__CN_UNIT[c0_bin_quotient_4]
                     else:
                         for check_index in range(1, len(self.__CN_UNIT)):
-                            if consult_4 % (2 ** check_index) == 0:
-                                checked_consult_4 = consult_4 // (2 ** check_index)
-                                if checked_consult_4 % 2 != 0:
+                            if quotient_4 % (2 ** check_index) == 0:
+                                checked_quotient_4 = quotient_4 // (2 ** check_index)
+                                if checked_quotient_4 % 2 != 0:
                                     return self.__CN_UNIT[check_index]
 
         # 首先验证输入的数字是否合法
@@ -107,7 +107,7 @@ class N2U(object):
                     """数字为0,但是该位数字的单位是CN_UNIT中的一个的情况\n
                         如果前一位是零，则删除零
                             这里会有一种极端情况，如果接下的超过四位数都为零，则会出现两个单位碰到一起\n
-                            这时候就在末尾用零代替第二个单位
+                            如果该单位小于等于原来的单位就在末尾用零代替第二个单位
                     """
                     if upper_num.endswith('零'):
                         upper_num = upper_num.rstrip('零')
@@ -166,7 +166,7 @@ def pop_unit():
 
 
 if __name__ == '__main__':
-    sn = '1' + '0' * 65535
-    append_uint("牛逢路")
+    sn = '1' + '0' * 30
+    # append_uint("牛逢路")
     # pop_unit()
     print(number2upper(int(sn)))
