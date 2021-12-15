@@ -27,6 +27,12 @@
     > :param num: 一个整型数字
 * 返回值 
     > :return: 返回数字的中文书写方式
+* 用法
+    > ```python
+    > from fengluU import n2u
+    > print(n2u(123456789))
+    > $ 一亿二千三百四十五万六千七百八十九
+    > ```
 
 ## rmb2u rmb2upper
 * 将输入的数字按照人民币大写的书写方式返回(支持16位)
@@ -37,6 +43,12 @@
     > :param num: 人民币小写金额
 * 返回值
     > :return: 返回人民币大写的形式
+* 用法
+    > ```python
+    > from fengluU import rmb2u
+    > print(rmb2u(1234567.89))
+    > $ 壹佰贰拾叁万肆仟伍佰陆拾柒元捌角玖分
+    > ```
 
 ## MySQLHelper
 * MySQLHelper MySQL工具类，便于数据库连接池及连接的管理和增删改查
