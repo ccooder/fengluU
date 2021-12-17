@@ -5,8 +5,8 @@ with open("README.md", "r", encoding='UTF-8') as fh:
 
 setuptools.setup(
     name="fengluB",
-    # version="0.0.03_alpha7",
-    version="0.0.03_alpha6",
+    version="0.0.03_alpha7",
+    # version="0.0.03_alpha8",
     author="Fenglu Niu",
     author_email="niufenglu@gmail.com",
     description="牛逢路的开发工具包",
@@ -22,6 +22,7 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=[
         "mysql-connector-python==8.0.11",
+        "regex",
     ],
 )
 # 1. python setup.py sdist bdist_wheel
