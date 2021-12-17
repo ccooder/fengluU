@@ -72,11 +72,13 @@ class RMB2U(object):
                                     return self.__RMB_UNIT[check_index]
 
         # 首先验证输入的数字是否合法
-        p = regex.compile(r'(^\d+)(\.?)(\d+)?$')
+        p = regex.compile(r'^(\d*)(\.?)(\d*?)$')
         if not regex.match(p, num):
             raise NFLError(f"您输入的 {num} 不是一个有效的人民币金额")
 
         int_part, dot, decimal_part = regex.findall(p, num)[0]
+        int_part = '0' if int_part == '' else int_part
+        int_part = str(int(int_part))
 
         if len(int_part) > 16:
             raise NFLError(f"您输入的 {num} 人民币金额大到我有点找不到北")
@@ -140,8 +142,14 @@ class RMB2U(object):
             else:
                 jiao = decimal_part[0]
                 fen = decimal_part[-1]
-                upper_num += self.__RMB_NUM[int(jiao)] + '角'
-                upper_num += self.__RMB_NUM[int(fen)] + '分'
+                if jiao == '0':
+                    upper_num += '零'
+                else:
+                    upper_num += self.__RMB_NUM[int(jiao)] + '角'
+                if fen != '0':
+                    upper_num += self.__RMB_NUM[int(fen)] + '分'
+            if int_part == '0':
+                upper_num = upper_num[2::].removeprefix('零')
 
         return upper_num
 
@@ -160,7 +168,7 @@ def rmb2upper(num: str) -> str:
 
 
 if __name__ == '__main__':
-    sn = 1234567.89
+    sn = '.0'
     # append_uint("牛逢路")
     # pop_unit()
     print(rmb2upper(str(sn)))

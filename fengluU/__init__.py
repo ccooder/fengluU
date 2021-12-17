@@ -1,7 +1,7 @@
 # from . import sendmsg
 import time
 
-__all__ = ['n2u', 'A', 'mysql_helper', 'NFLError', 'mysql_alter', 'rmb2u']
+__all__ = ['n2u', 'A', 'mysql_helper', 'NFLError', 'mysql_alter', 'rmb2u', 'exec_time']
 
 name = "fengluU"
 

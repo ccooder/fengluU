@@ -1,12 +1,12 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding='UTF-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="fengluB",
-    version="0.0.03_alpha5",
-    # version="0.0.03_alpha6",
+    # version="0.0.03_alpha7",
+    version="0.0.03_alpha6",
     author="Fenglu Niu",
     author_email="niufenglu@gmail.com",
     description="牛逢路的开发工具包",

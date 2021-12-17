@@ -11,8 +11,6 @@ from mysql.connector.pooling import PooledMySQLConnection
 
 from fengluU import NFLError
 
-from fengluU import n2u
-
 __all__ = ['MySQLHelper', 'QueryDict', 'QueryDictList', 'QueryOpt']
 
 
@@ -397,6 +395,7 @@ class MySQLHelper(object):
     def exec_ddl(self, cnx: PooledMySQLConnection = None, ddl: str = None):
         """
         数据库小助手-执行DDL语句\n
+        :param cnx: 数据库连接，装饰器自动赋值
         :param ddl: DDL语句
         """
         cursor = cnx.cursor()
