@@ -21,7 +21,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        "mysql-connector-python==8.0.11",
+        "mysql-connector-python==8.0.14",
         "regex",
     ],
 )
