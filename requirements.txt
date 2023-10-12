@@ -1,5 +1,5 @@
 bleach==4.0.0
-certifi==2023.7.22
+certifi==2022.12.7
 charset-normalizer==2.0.4
 colorama==0.4.4
 docutils==0.17.1
@@ -10,7 +10,7 @@ mysql-connector-python==8.0.14
 packaging==21.0
 pkginfo==1.7.1
 protobuf==3.18.3
-Pygments==2.9.0
+Pygments==2.15.0
 pyparsing==2.4.7
 pywin32-ctypes==0.2.0
 readme-renderer==29.0
