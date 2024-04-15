@@ -1,4 +1,5 @@
 # from . import sendmsg
+import functools
 import time
 
 __all__ = ['n2u', 'A', 'mysql_helper', 'NFLError', 'mysql_alter', 'rmb2u', 'exec_time']
@@ -19,6 +20,7 @@ class NFLError(Exception):
 
 
 def exec_time(func):
+    @functools.wraps(func)
     def decorator(*args, **kwargs):
         start = time.time()
         ret = func(*args, **kwargs)
